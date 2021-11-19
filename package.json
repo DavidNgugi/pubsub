@@ -1,0 +1,23 @@
+{
+  "name": "pub-sub-test",
+  "version": "1.0.0",
+  "description": "Pub-Sub test",
+  "scripts": {
+    "start": "pm2 start -f ./src/publisher/index.js --name publisher && pm2 start -f ./src/subscriber/index.js --name subscriber",
+    "stop": "pm2 stop all",
+    "test": "npm test"
+  },
+  "keywords": ["pub-sub"],
+  "author": "davidngugi",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.24.0",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "pm2": "^5.1.2",
+    "redis": "^3.1.2",
+    "supertest": "^6.1.6",
+    "valid-url": "^1.0.9"
+  }
+}
