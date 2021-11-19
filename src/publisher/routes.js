@@ -43,7 +43,7 @@ const routes = (client) => {
         try {
             const message = JSON.stringify(req.body)
             client.publish(topic, message)
-            res.send(`Publishing message ${message} to topic ${topic}`).status(200);
+            res.send(`Published message ${message} to topic ${topic}`).status(200);
         } catch (err) {
             throw new Error(`Error publishing to topic ${topic} , ${err}`);
         }
