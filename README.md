@@ -13,10 +13,18 @@ npm install && cp env.example .env
 
 ## Running the app
 
-The app runs on localhost. Note: I could only test this on macOS
+First ensure you have installed Redis on your local machine You can find the latest stable version [here](https://redis.io/download). 
+
+Note 2: I could only test this on macOS
 
 ``` sh
 sh start-server.sh
+```
+
+or
+
+``` sh
+ ./start-server.sh
 ```
 
 It is possible to monitor on the `PM2.io dashboard` if you provide a valid `PM2_PUBLIC_KEY` and `PM2_SECRET_KEY` in the `.env` file. The `start-server.sh` script will automatically detect the variables and link to the dashboard
