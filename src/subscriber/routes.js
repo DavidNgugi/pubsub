@@ -3,16 +3,25 @@ const { checkRedis } = require('../shared/utils');
 
 const routes = (client) => {
 
-    router.post('/:params?', async (req, res) => {
+    router.post('/:params?', async (req, res, next) => {
         const topic = req.body.topic;
-        const data = {
-            topic: topic,
-            url: req.body.url
-        };
-        client.subscribe(topic, (err, count) => {
-            if (err) throw new Error(err.message);
-            res.send(JSON.stringify(data));
-        });
+        try {
+
+            if (typeof req.body.url === 'undefined') {
+                throw new Error('No url provided');
+            }
+
+            const data = {
+                topic: topic,
+                url: req.body.url
+            };
+            client.subscribe(topic, (err, count) => {
+                if (err) throw new Error(`Couldn't subscribe to topic ${topic}. ${err.message}`);
+                res.send(JSON.stringify(data));
+            });
+        } catch (err) {
+            next(err);
+        }
     });
 
     // added route for healchecks if the app is up and running well
