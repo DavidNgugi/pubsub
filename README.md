@@ -1,4 +1,4 @@
-# Pub-Sub test with NodeJs and Redis
+# Pub/Sub with NodeJs and Redis
 
 This app is composed of a `publisher` and `1 subscriber`.
 A subscriber is always listening for messages on their respective channels on their specified port. By default it's `port 9000` and the publisher running on `port 8000` manages handling messages from clients and publishing them to subscribers.
