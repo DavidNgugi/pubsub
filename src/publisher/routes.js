@@ -25,14 +25,12 @@ const routes = (client) => {
             throw new Error(`Internal Server Error. Couldn't subscribe to topic ${topic}. Error ${err}`);
         });
 
-        console.log("subscribe to a topic", response.data);
         if (!res.status === 200) {
             throw new Error('invalid topic');
         }
 
         const handleReply = (err, reply) => {
             if (err) throw new Error(err.message);
-            console.log(`Subscribed to ${reply} channel.`);
         }
         // register topic subscribers on redis
         await client.hset(`subscribers:${topic}`, topic, url, handleReply);

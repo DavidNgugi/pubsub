@@ -11,7 +11,6 @@ const routes = (client) => {
         };
         client.subscribe(topic, (err, count) => {
             if (err) throw new Error(err.message);
-            console.log(`Subscribed to ${count} channels.`);
             res.send(JSON.stringify(data));
         });
     });

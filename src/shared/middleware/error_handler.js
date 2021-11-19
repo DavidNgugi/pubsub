@@ -3,7 +3,6 @@ const error_handler = (err, req, res, next) => {
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development' ? err : {};
     // send error message
-    console.log(err)
     res.send(err.message).status(err.status || 500);
 }
 
