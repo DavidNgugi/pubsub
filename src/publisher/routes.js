@@ -1,7 +1,15 @@
-const { checkRedis } = require('../shared/utils');
+const { checkRedis, jsonify } = require('../shared/utils');
 const axios = require('axios');
 const validUrl = require('valid-url');
 const router = require('express').Router();
+
+class PublisherError extends Error {
+    constructor(message, status) {
+        super(message);
+        this.message = message;
+        this.status = status;
+    }
+}
 
 const routes = (client) => {
 
@@ -11,11 +19,11 @@ const routes = (client) => {
         try {
 
             if (typeof req.body.url === 'undefined') {
-                throw new Error('No url provided');
+                throw new PublisherError('No url provided', 400);
             }
 
             if (validUrl.isUri(req.body.url) === undefined) {
-                throw new Error('Bad Request. Valid url required');
+                throw new PublisherError('Bad Request. Valid url required', 400);
             }
 
             const url = req.body.url;
@@ -24,22 +32,17 @@ const routes = (client) => {
                 topic: topic,
                 url: url
             }).catch(err => {
-                throw new Error(`Internal Server Error. Couldn't subscribe to topic ${topic}. Error ${err}`);
+                throw new PublisherError(`Internal Server Error. Couldn't subscribe to topic ${topic}.`);
             });
 
-            if (!res.status === 200) {
-                throw new Error('invalid topic');
-            }
-
             const handleReply = (err, reply) => {
-                if (err) throw new Error(err.message);
+                if (err) throw new PublisherError(`Couldn't register subscriber. url: ${url}, topic: ${topic}.`);
             }
             // register topic subscribers on redis
-            await client.hset(`subscribers:${topic}`, topic, url, handleReply);
-
-            res.send(JSON.stringify(response.data));
+            client.hset(`subscribers:${topic}`, topic, url, handleReply);
+            res.send(response.data);
         } catch (err) {
-            next(err);
+            next(err)
         }
     });
 
@@ -48,16 +51,23 @@ const routes = (client) => {
         try {
             const message = JSON.stringify(req.body)
             client.publish(topic, message)
-            res.send(`Published message ${message} to topic ${topic}`).status(200);
+            res.send(jsonify(`Published message ${message} to topic ${topic}`)).status(200);
         } catch (e) {
-            const err = new Error(`Error publishing to topic ${topic} , ${e}`);
+            const err = new PublisherError(`Error publishing to topic ${topic}`);
             next(err)
         }
     });
 
     // added route for healchecks if the app is up and running well
-    router.get('/healthcheck', async (req, res) => {
-        return res.send('Publisher up').status(200) ? checkRedis(client) : res.send('Publisher down').status(500);
+    router.get('/healthcheck', async (req, res, next) => {
+        try {
+            if (!checkRedis(client)) {
+                throw new PublisherError('Publisher down', 500)
+            }
+            return res.send(jsonify('Publisher up')).status(200);
+        } catch (err) {
+            next(err);
+        }
     });
 
     return router;

@@ -1,5 +1,13 @@
 const router = require('express').Router();
-const { checkRedis } = require('../shared/utils');
+const { checkRedis, jsonify } = require('../shared/utils');
+
+class SubscriberError extends Error {
+    constructor(message, status) {
+        super(message);
+        this.message = message;
+        this.status = status;
+    }
+}
 
 const routes = (client) => {
 
@@ -8,7 +16,7 @@ const routes = (client) => {
         try {
 
             if (typeof req.body.url === 'undefined') {
-                throw new Error('No url provided');
+                throw new SubscriberError('No url provided', 400);
             }
 
             const data = {
@@ -16,8 +24,8 @@ const routes = (client) => {
                 url: req.body.url
             };
             client.subscribe(topic, (err, count) => {
-                if (err) throw new Error(`Couldn't subscribe to topic ${topic}. ${err.message}`);
-                res.send(JSON.stringify(data));
+                if (err) throw new SubscriberError(`Couldn't subscribe to topic ${topic}.`, 500);
+                res.send(JSON.stringify(data)).status(200);
             });
         } catch (err) {
             next(err);
@@ -26,7 +34,14 @@ const routes = (client) => {
 
     // added route for healchecks if the app is up and running well
     router.get('/healthcheck', async (req, res) => {
-        return res.send('Subscriber up').status(200) ? checkRedis(client) : res.send('Subscriber down').status(500);
+        try {
+            if (!checkRedis(client)) {
+                throw new SubscriberError('Subscriber down', 500)
+            }
+            return res.send(jsonify('Subscriber up')).status(200);
+        } catch (err) {
+            next(err);
+        }
     });
 
     return router;

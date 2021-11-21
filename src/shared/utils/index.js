@@ -8,6 +8,12 @@ const checkRedis = (client) => {
         }
     });
 };
+
+const jsonify = (data) => {
+    return { message: data };
+};
+
 module.exports = {
-    checkRedis
+    checkRedis,
+    jsonify
 };
