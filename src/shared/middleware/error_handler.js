@@ -6,7 +6,7 @@ const error_handler = (err, req, res, next) => {
     res.locals.error = req.app.get('env') === 'development' ? err : {};
     // send error message
     err.status = err.status ? err.status : 500;
-    res.send(jsonify(err.message)).status(err.status);
+    res.status(err.status).send(jsonify(err.message));
 }
 
 module.exports = error_handler;

@@ -14,7 +14,7 @@ express_app.get('/test/healthcheck', async (req, res) => {
 
 const create_app = (routes) => {
     if (routes) {
-        express_app.use('/', routes);
+        express_app.use(routes);
     }
 
     express_app.use(error_handler);
