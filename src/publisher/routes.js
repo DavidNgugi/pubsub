@@ -11,12 +11,18 @@ class PublisherError extends Error {
     }
 }
 
+axios.defaults.headers.post['Content-Type'] = 'application/json';
+axios.defaults.headers.post['Accept'] = 'application/json';
+
 const routes = (client) => {
 
-    router.post('/subscribe/:topic', async (req, res, next) => {
-        const topic = req.params.topic;
-
+    router.post('/subscribe/:topic?', async (req, res, next) => {
         try {
+            if (!req.params.topic) {
+                throw new PublisherError('No topic provided', 400);
+            }
+
+            const topic = req.params.topic;
 
             if (typeof req.body.url === 'undefined') {
                 throw new PublisherError('No url provided', 400);
@@ -40,7 +46,8 @@ const routes = (client) => {
             }
             // register topic subscribers on redis
             client.hset(`subscribers:${topic}`, topic, url, handleReply);
-            res.send(response.data);
+
+            res.json(response.data).status(200);
         } catch (err) {
             next(err)
         }
@@ -55,18 +62,6 @@ const routes = (client) => {
         } catch (e) {
             const err = new PublisherError(`Error publishing to topic ${topic}`);
             next(err)
-        }
-    });
-
-    // added route for healchecks if the app is up and running well
-    router.get('/healthcheck', async (req, res, next) => {
-        try {
-            if (!checkRedis(client)) {
-                throw new PublisherError('Publisher down', 500)
-            }
-            return res.send(jsonify('Publisher up')).status(200);
-        } catch (err) {
-            next(err);
         }
     });
 
