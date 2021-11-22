@@ -42,3 +42,9 @@ curl -X POST -H "Content-Type: application/json" -d '{ "url": "http://localhost:
 ``` sh
 curl -X POST -H "Content-Type: application/json" -d '{"message": "hello"}' http://localhost:8000/publish/topic1
 ```
+
+## Unit tests
+
+```sh
+npm run test
+```
