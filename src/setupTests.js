@@ -5,6 +5,7 @@ global.redis = {
     createClient: jest.fn(() => {
         return {
             on: jest.fn(),
+            ping: jest.fn(() => true),
             subscribe: jest.fn((channel, handleReply) => {
                 handleReply(null, 'OK');
             }),
